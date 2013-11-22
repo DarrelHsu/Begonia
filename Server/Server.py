@@ -1,8 +1,14 @@
 import web
 import re
 DEBUG = False 
-URLS={}
-CACHES={}
+URLS={
+    "GET" : {} ,
+    "POST" : {}  
+}
+CACHES={
+    "GET" : {} ,
+    "POST" : {}  
+}
 APP = None
 class requestHandler :
     def POSTHandler( self ) :
@@ -12,33 +18,27 @@ class requestHandler :
     def handler( self ) :
         req = web.ctx.env
         path = req['PATH_INFO']
-        query = req['QUERY_STRING']
         method = req['REQUEST_METHOD']
         handlerMethod = None 
         if DEBUG is True :
             if path == '/shutdown' :
                 exit()
-        if path in CACHES :
-            handlerMethod = CACHES[ path ]
-        elif path in URLS :
-            handlerMethod = URLS[ path ]
+        if path in CACHES[ method ] :
+            handlerMethod = CACHES[ method ] [ path ]
+        elif path in URLS[ method ]  :
+            handlerMethod = URLS[ method ] [ path ]
         else :
             for key in URLS :
                 reg = re.compile( "^%s$" % key )
                 matchs = reg.match( path )
                 if matchs is not None :
-                    handlerMethod = URLS[ key ] 
+                    handlerMethod = URLS[ method ][ key ] 
                     break 
-            CACHES[ path ] = handlerMethod 
+            CACHES[ method ][ path ] = handlerMethod 
         if handlerMethod is None :
             return web.notfound()
         else : 
-           handlerMethodMethod = handlerMethod['method'];
-           if handlerMethodMethod == "REQUEST" or handlerMethodMethod == method :
-               return handlerMethod['handler']()
-           else :
-               web.header('Status Code', '405')
-               return "<h1>Method Not Allowed</h1>"
+            return handlerMethod( req )
 
     def POST( self , var = None , args = None ) :
         return self.handler( );
@@ -51,10 +51,7 @@ def add_request_handler( path , fn , method = None ) :
         method = method.upper(  ) 
         if method != 'GET' and method != 'POST' :
             method = 'GET'
-        URLS[ path ]  = {
-            "method" : method ,
-            "handler" : fn
-        }
+        URLS[ method ] [ path ]= fn
 def request_method( path , method = "REQUEST" ):
     def _( *args , **kws ): 
         fn = args[0]
@@ -78,7 +75,7 @@ class Server :
         urls = ( '(.*)' , requestHandler )
         app = web.application( urls , globals()  ) 
         app.run();
-        APP = app 
+        self.app = APP = app 
 
 if __name__ == '__main__' :
     class myServer( Server ) :
