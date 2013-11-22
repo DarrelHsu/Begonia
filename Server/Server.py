@@ -57,6 +57,15 @@ class Server :
         APP = app 
 
 if __name__ == '__main__' :
+    '''
+    class myServer( server ) : 
+        @Begonia.Sever.GET("/fuck")
+        def fuck( self ) :
+            return "fuck"
+        @Begonia.Sever.POST"/fuck/\d{10}")
+        def fuckpost( self ) :
+            return "fuck"
+    '''
     class myServer( Server ) :
         def fuck( self ) :
             return "fuck"
