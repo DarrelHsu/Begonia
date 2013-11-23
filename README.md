@@ -12,9 +12,9 @@ python 2.7 development utils
       myServer.py
    """
     import Begonia
-    class myServer( Begonia.Server.server )
-        @GET("/test")
-        def test_get( ) :
+    class myServer( Begonia.Server.server ) : 
+        @Begonia.Server.GET("/test")
+        def test_get( req ) :
             return "test"
     myServer().start()
 ```
